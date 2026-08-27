@@ -1,0 +1,35 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color-scheme: dark;
+    font-family: arial;
+}
+body{
+    height: 100vh;
+}
+canvas{
+    position: absolute;
+    background-color: #17191C;
+}
+#tools{
+    border: 1px solid #6c6e72;
+    background: #33363a;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 10px;
+}
+.tool{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+input[type="range"] {
+    width: 150px;
+}
