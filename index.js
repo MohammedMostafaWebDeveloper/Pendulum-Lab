@@ -26,6 +26,12 @@ var colors = [
 var camera = {x: 0, y: 0}
 var camera0 = {x: 0, y: 0}
 
+var grid_length = 30
+var grid_rows = canvas.height / grid_length
+var grid_cols = canvas.width / grid_length
+
+var paused = false
+
 class Point{
     constructor(x, y, color) {
         this.pos = {x: x, y: y}
@@ -37,7 +43,7 @@ class Point{
     }
     draw() {
         c.beginPath()
-        c.arc(this.pos.x, this.pos.y, 5, 0, Math.PI * 2, false)
+        c.arc(this.pos.x, this.pos.y, Number(document.querySelector("#radius").value) / 2, 0, Math.PI * 2, false)
         c.fillStyle = this.color
         c.fill()
         c.fillStyle = "rgba(0, 0, 0, 0.5)"
@@ -47,9 +53,11 @@ class Point{
         if (this.movable == 0 || dragged_point == this) {
             return
         }
+        var damping_input = Number(document.querySelector("#damping").value)
+        var damping = Math.exp(-(damping_input / 10) * dt)
         this.acc.y += g
-        this.vel.x = this.pos.x - this.pos0.x
-        this.vel.y = this.pos.y - this.pos0.y
+        this.vel.x = (this.pos.x - this.pos0.x) * damping
+        this.vel.y = (this.pos.y - this.pos0.y) * damping
         this.pos0.x = this.pos.x
         this.pos0.y = this.pos.y
         this.pos.x += this.vel.x + this.acc.x * dt * dt
@@ -69,7 +77,7 @@ class Constrain{
         c.moveTo(this.p1.pos.x, this.p1.pos.y)
         c.lineTo(this.p2.pos.x, this.p2.pos.y)
         c.strokeStyle = this.color
-        c.lineWidth = 20
+        c.lineWidth = Number(document.querySelector("#radius").value) * 2
         c.lineCap = "round"
         c.stroke()
     }
@@ -153,12 +161,15 @@ window.addEventListener("mousedown", (e) => {
         hand_tool = true
         camera0.x = e.clientX
         camera0.y = e.clientY
+        canvas.style.cursor = "grabbing"
         return
     }
     pendulum.points.forEach(point => {
         var dist = Math.hypot(point.pos.x - e.clientX + camera.x, point.pos.y - e.clientY + camera.y)
-        if (dist < 10) {
+        if (dist < Number(document.querySelector("#radius").value)) {
             dragged_point = point
+            mouse = {x: e.clientX, y: e.clientY}
+            canvas.style.cursor = "move"
         }
     })
 })
@@ -174,14 +185,18 @@ window.addEventListener("mousemove", (e) => {
         mouse = {x: e.clientX, y: e.clientY}
         dragged_point.pos.x = mouse.x - camera.x
         dragged_point.pos.y = mouse.y - camera.y
-        pendulum.constrains.forEach(constrain => {
-            constrain.fix()
-        })
+        for (var i = 0; i < 10; i++) {
+            pendulum.constrains.forEach(constrain => {
+                constrain.fix()
+            })
+        }
+        
     }
     
 })
 
 window.addEventListener("mouseup", () => {
+    canvas.style.cursor = "auto"
     hand_tool = false
     dragged_point = null
 })
@@ -209,19 +224,71 @@ var t0 = 0
 var targetdt = 1/60
 var accumulator = 0
 
+window.addEventListener("resize", () => {
+    canvas.width = innerWidth
+    canvas.height = innerHeight
+    c = canvas.getContext("2d")
+})
+
+document.querySelector("#pause").addEventListener("click", () => {
+    paused = true
+    document.querySelector("#pause").style.display = "none"
+    document.querySelector("#play").style.display = "flex"
+})
+document.querySelector("#play").addEventListener("click", () => {
+    paused = false
+    document.querySelector("#pause").style.display = "flex"
+    document.querySelector("#play").style.display = "none"
+})
+document.querySelector("#reset").addEventListener("click", () => {
+    pendulum = new Pendulum(2, 100)
+    document.querySelector("#play").click()
+    document.querySelector("#count").value = "2"
+    document.querySelector("#gravity").value = "500"
+    document.querySelector("#length").value = "100"
+    document.querySelector("#radius").value = "10"
+    document.querySelector("#damping").value = "0"
+})
+document.querySelector("#info").addEventListener("click", () => {
+    document.querySelector("#info-con").classList.add("shown")
+})
+
 function animate(t) {
     var dt = (t - t0) / 1000
-    if (isNaN(dt) || dt > 0.1) {
+    if (isNaN(dt) || dt > 0.1 || paused) {
         dt = 0
     }
     t0 = t
     accumulator += dt
+    if (paused) {
+        for (var i = 0; i < 10; i++) {
+            pendulum.constrains.forEach(constrain => {
+                constrain.fix()
+            })
+        }
+    }
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     c.save()
     c.translate(camera.x, camera.y)
-    while (accumulator > targetdt) {
-        pendulum.update(dt)
+    var x = Math.ceil(-camera.x / grid_length) * grid_length
+    for (var i = 0; i < grid_cols; i++) {
+        c.beginPath()
+        c.moveTo(x + i * grid_length, -camera.y)
+        c.lineTo(x + i * grid_length, -camera.y + canvas.height)
+        c.strokeStyle = "#35383d"
+        c.stroke()
+    }
+    var y = Math.ceil(-camera.y / grid_length) * grid_length
+    for (var i = 0; i < grid_rows; i++) {
+        c.beginPath()
+        c.moveTo(-camera.x, y + i * grid_length)
+        c.lineTo(-camera.x + canvas.width, y + i * grid_length)
+        c.strokeStyle = "#35383d"
+        c.stroke()
+    }
+    while (accumulator >= targetdt) {
+        pendulum.update(targetdt)
         accumulator -= targetdt
     }
     pendulum.draw()

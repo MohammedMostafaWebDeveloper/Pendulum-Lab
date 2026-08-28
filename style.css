@@ -33,3 +33,52 @@ canvas{
 input[type="range"] {
     width: 150px;
 }
+.tool-btn{
+    width: 35px;
+    height: 35px;
+    padding: 7px;
+    border-radius: 50%;
+    background-color: rgb(41, 41, 41);
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.tool-btn:hover{
+    background-color: rgb(75, 75, 75);
+}
+.con{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+.con.shown{
+    pointer-events: auto;
+    opacity: 1;
+}
+#info-data{
+    background-color: #33363a;
+    border: 1px solid #6c6e72;
+    border-radius: 10px;
+    padding: 15px;
+    width: 50%;
+    min-width: 400px;
+}
+li{
+    margin-left: 15px;
+    margin-bottom: 3px;
+}
+hr{
+    margin: 10px 0px 10px 0px;
+    border-color: #6c6e72;
+}

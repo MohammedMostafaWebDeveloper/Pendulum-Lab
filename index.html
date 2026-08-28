@@ -10,7 +10,7 @@
     <canvas></canvas>
     <div id="tools">
         <div class="tool">
-            Pendulums count
+            Segments count
             <input type="range" min="1" value="2" max="20" id="count">
         </div>
         <div class="tool">
@@ -20,6 +20,35 @@
         <div class="tool">
             Segment Length
             <input type="range" min="50" value="100" max="250" id="length">
+        </div>
+        <div class="tool">
+            Segment radius
+            <input type="range" min="5" value="10" max="20" id="radius">
+        </div>
+        <div class="tool">
+            Air resistence
+            <input type="range" min="0" value="0" max="10" id="damping">
+        </div>
+        <div class="tool">
+            <button class="tool-btn" id="info"><img src="assets/Info.svg"></button>
+            <div style="display: flex; align-items: center; gap: 7px;">
+                <button class="tool-btn" id="reset"><img src="assets/Reset.svg"></button>
+                <button class="tool-btn" id="pause"><img src="assets/Pause.svg"></button>
+                <button class="tool-btn" id="play" style="display: none;"><img src="assets/Play.svg"></button>
+            </div>
+        </div>
+    </div>
+    <div class="con" id="info-con" onclick="if (event.target == this) {this.classList.remove('shown')}">
+        <div id="info-data">
+            <h3>How to use?</h3>
+            <hr>
+            <ul>
+                <li>Drag any point on the pendulum with the mouse to move it</li>
+                <li>Right click on the screen and drag to move the canvas</li>
+                <li>Adgust the sliders to customize the pendulum</li>
+                <li>Click the play/pause button to play or pause the simulation</li>
+                <li>Click the reset button to reset the pendulum and the sliders</li>
+            </ul>
         </div>
     </div>
     <script src="index.js"></script>
